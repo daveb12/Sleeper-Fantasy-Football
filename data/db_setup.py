@@ -18,10 +18,16 @@ class DBSetup:
                 team2_starters_points FLOAT
             )
             """,
-
             """
-            CREATE TABLE IF NOT EXISTS
-            """
+            CREATE TABLE IF NOT EXISTS teams (
+                id SERIAL PRIMARY KEY,
+                team_name VARCHAR(255) NOT NULL,
+                owner_name_1 VARCHAR(255) NOT NULL,
+                owner_name_2 VARCHAR(255),
+                is_active BOOLEAN,
+                division VARCHAR(255)
+            )
+            """,
             # Add more table creation commands here
         ]
         
