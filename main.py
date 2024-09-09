@@ -1,16 +1,20 @@
-from sleeper.sleeper_api import SleeperAPI
-from config import LEAGUE_ID
-
+from src.sleeper.sleeper_api import SleeperAPI
+from src.config import LEAGUE_ID
+from data.db_setup import DBSetup  # Import the DBSetup class
 
 def main():
+    # Initialize the database setup and create tables
+    db_setup = DBSetup()
+    db_setup.create_tables()
+
     # Initialize SleeperAPI with your league ID
     sleeper = SleeperAPI(LEAGUE_ID)
 
     # Get users and create a mapping with team_name
     users = sleeper.get_users()
     user_id_to_team_name = {
-    user.get('user_id', 'unknown_id'): user.get('metadata', {}).get('team_name', user.get('display_name', 'Unknown'))
-    for user in users
+        user.get('user_id', 'unknown_id'): user.get('metadata', {}).get('team_name', user.get('display_name', 'Unknown'))
+        for user in users
     }
 
     # Get league info
@@ -25,7 +29,6 @@ def main():
         for roster in rosters
     }
 
-
     # Fetch matchups for a specific week
     week = 1  # Replace this with the actual week number
     matchups = sleeper.get_weekly_matchups(week)
@@ -36,10 +39,7 @@ def main():
     # Process each matchup
     for matchup in matchups:
         team1_roster_id = matchup.get('roster_id', None)
-        
-
         team1_name = roster_id_to_team_name.get(team1_roster_id, 'Unknown')
-
         team1_starters_points = sum(matchup.get('starters_points', []))
 
         # Find opponent's roster ID and name
@@ -50,7 +50,6 @@ def main():
                 break
         
         team2_name = roster_id_to_team_name.get(opponent_roster_id, 'Unknown')
-
         team2_starters_points = sum(other_matchup.get('starters_points', [])) if opponent_roster_id else 0.0
 
         # Ensure each matchup is only printed once
@@ -68,7 +67,6 @@ def main():
         print(f"Team 1: {result['team1_name']} - Starters Points: {result['team1_starters_points']:.1f}")
         print(f"Team 2: {result['team2_name']} - Starters Points: {result['team2_starters_points']:.1f}")
         print("-" * 40)
-
 
 if __name__ == "__main__":
     main()
