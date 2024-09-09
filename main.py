@@ -1,14 +1,13 @@
+import pandas as pd
 from src.sleeper.sleeper_api import SleeperAPI
-from src.config import LEAGUE_ID
-from data.db_setup import DBSetup  # Import the DBSetup class
+from src.config import LEAGUE_ID, YEAR
+from data.db_setup import DBSetup
+from data.db_loader import DBLoader
 
 def main():
-    # Initialize the database setup and create tables
-    db_setup = DBSetup()
-    db_setup.create_tables()
-
     # Initialize SleeperAPI with your league ID
     sleeper = SleeperAPI(LEAGUE_ID)
+    year = YEAR
 
     # Get users and create a mapping with team_name
     users = sleeper.get_users()
@@ -50,23 +49,29 @@ def main():
                 break
         
         team2_name = roster_id_to_team_name.get(opponent_roster_id, 'Unknown')
-        team2_starters_points = sum(other_matchup.get('starters_points', [])) if opponent_roster_id else 0.0
+        team2_starters_points = sum(next((m.get('starters_points', []) for m in matchups if m['roster_id'] == opponent_roster_id), []))
 
         # Ensure each matchup is only printed once
         if matchup['matchup_id'] not in processed_matchups:
             processed_matchups[matchup['matchup_id']] = {
+                'matchup_id': matchup['matchup_id'],
                 'team1_name': team1_name,
                 'team1_starters_points': team1_starters_points,
                 'team2_name': team2_name,
                 'team2_starters_points': team2_starters_points,
+                'week': week,
+                'year': year
             }
 
-    # Sort and print matchups based on matchup ID (descending order)
-    for matchup_id, result in sorted(processed_matchups.items(), key=lambda x: x[0], reverse=True):
-        print(f"Matchup ID: {matchup_id}")
-        print(f"Team 1: {result['team1_name']} - Starters Points: {result['team1_starters_points']:.1f}")
-        print(f"Team 2: {result['team2_name']} - Starters Points: {result['team2_starters_points']:.1f}")
-        print("-" * 40)
+    # Convert processed_matchups to DataFrame
+    df_matchups = pd.DataFrame.from_dict(processed_matchups, orient='index')
+
+    print(df_matchups)
+
+    # Initialize DBLoader and upsert the DataFrame into the matchups table
+    db_loader = DBLoader()
+    db_loader.upsert_dataframe('matchups', df_matchups, conflict_columns=['matchup_id','week','year'])
+
 
 if __name__ == "__main__":
     main()

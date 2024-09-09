@@ -13,9 +13,10 @@ class DBSetup:
                 week INT NOT NULL,
                 year INT NOT NULL,
                 team1_name VARCHAR(255),
-                team1_starters_points FLOAT,
+                team1_starters_points NUMERIC(38, 2),
                 team2_name VARCHAR(255),
-                team2_starters_points FLOAT
+                team2_starters_points NUMERIC(38, 2),
+                UNIQUE (matchup_id, week, year)
             )
             """,
             """

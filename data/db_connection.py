@@ -7,22 +7,23 @@ load_dotenv()
 
 class DatabaseConnection:
     def __init__(self):
-        self.conn = None
+        self.connection_string = self.get_connection_string()
+
+    def get_connection_string(self):
+        return os.getenv('DATABASE_URL')
 
     def connect(self):
         try:
-            self.conn = psycopg2.connect(
-                dbname=os.getenv("DB_NAME"),
-                user=os.getenv("DB_USER"),
-                password=os.getenv("DB_PASSWORD"),
-                host=os.getenv("DB_HOST"),
-                port=os.getenv("DB_PORT")
-            )
-            return self.conn
+            conn = psycopg2.connect(self.connection_string)
+            return conn
         except Exception as e:
             print(f"Error connecting to the database: {e}")
             return None
 
-    def close(self):
-        if self.conn:
-            self.conn.close()
+    def close(self, conn):
+        try:
+            if conn:
+                conn.close()
+        except Exception as e:
+            print(f"Error closing the database connection: {e}")
+
