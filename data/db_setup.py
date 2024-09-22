@@ -60,7 +60,7 @@ class DBSetup:
                 news_updated BIGINT,
                 number INT,
                 depth_chart_order INT,
-                fantasy_positions VARCHAR[],
+                fantasy_positions VARCHAR,
                 high_school VARCHAR,
                 full_name VARCHAR,
                 rotoworld_id INT,
