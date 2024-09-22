@@ -66,6 +66,8 @@ def main():
         week_df = pd.DataFrame.from_dict(processed_matchups, orient='index')
         all_matchups_df = pd.concat([all_matchups_df, week_df], ignore_index=True)
 
+        print(all_matchups_df)
+
     # Initialize DBLoader and upsert the DataFrame into the matchups table
     db_loader = DBLoader()
     db_loader.upsert_dataframe('matchups', all_matchups_df, conflict_columns=['matchup_id', 'week', 'year'])

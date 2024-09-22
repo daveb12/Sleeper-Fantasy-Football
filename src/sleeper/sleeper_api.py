@@ -29,3 +29,7 @@ class SleeperAPI:
     def get_users(self):
         endpoint = f'league/{self.league_id}/users'
         return self._make_request(endpoint)
+    
+    def get_players(self):
+        endpoint = f'players/nfl'
+        return self._make_request(endpoint)
