@@ -1,4 +1,4 @@
-import psycopg2
+from sqlalchemy import create_engine
 import os
 from dotenv import load_dotenv
 
@@ -7,23 +7,21 @@ load_dotenv()
 
 class DatabaseConnection:
     def __init__(self):
-        self.connection_string = self.get_connection_string()
+        self.engine = create_engine(self.get_connection_string())
 
     def get_connection_string(self):
         return os.getenv('DATABASE_URL')
 
     def connect(self):
-        try:
-            conn = psycopg2.connect(self.connection_string)
-            return conn
-        except Exception as e:
-            print(f"Error connecting to the database: {e}")
-            return None
+        return self.engine.connect()
 
     def close(self, conn):
-        try:
-            if conn:
-                conn.close()
-        except Exception as e:
-            print(f"Error closing the database connection: {e}")
+        conn.close()
+    
+    def __enter__(self):
+        self.conn = self.connect()
+        return self.conn
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
 
